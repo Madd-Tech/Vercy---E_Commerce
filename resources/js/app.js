@@ -3,6 +3,7 @@ import '../css/app.css';
 
 import LandingApp from './landing/main';
 import AdminApp from './admin/main';
+import CategoriesApp from './admin/categories/main';
 import LoginApp from './auth/main';
 
 console.log('app.js loaded');
@@ -16,3 +17,7 @@ if (document.getElementById('admin-app')) {
 if (document.getElementById('login-app')) {
     createApp(LoginApp).mount('#login-app');
 }
+if (document.getElementById('categories-app')) {
+    createApp(CategoriesApp).mount('#categories-app');
+}
+
