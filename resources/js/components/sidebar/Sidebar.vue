@@ -25,7 +25,7 @@
         Categories
       </a>
 
-      <a href="/admin/products"
+      <a href="/admin/product"
          :class="[
            'flex items-center px-4 py-3 text-slate-400 rounded-xl transition-all duration-200 mb-1 font-medium hover:bg-white/5 hover:text-white hover:translate-x-1', 
            isActive('/admin/products') ? 'bg-gradient-to-r from-indigo-600/20 to-purple-600/20 text-indigo-300 border border-indigo-500/30 shadow-lg shadow-indigo-500/10' : ''

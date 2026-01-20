@@ -4,6 +4,7 @@ import '../css/app.css';
 import LandingApp from './landing/main';
 import AdminApp from './admin/main';
 import CategoriesApp from './admin/categories/main';
+import ProductApp from './admin/product/main';
 import LoginApp from './auth/main';
 
 console.log('app.js loaded');
@@ -19,5 +20,8 @@ if (document.getElementById('login-app')) {
 }
 if (document.getElementById('categories-app')) {
     createApp(CategoriesApp).mount('#categories-app');
+}
+if (document.getElementById('product-app')) {
+    createApp(ProductApp).mount('#product-app');
 }
 
