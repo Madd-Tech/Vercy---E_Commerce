@@ -11,9 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::create('customers', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->integer('phone');
+            $table->string('address');
+            $table->timestamps();
+        });
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
             $table->string('order_number')->unique();
             $table->enum('status', ['pending','paid','shipped','completed','canceled']);
             $table->decimal('total_price', 12, 2);

@@ -57,14 +57,89 @@
                      placeholder="Enter product description..."></textarea>
             </div>
             
-            <!-- Status -->
-            <div class="space-y-2">
-              <label class="text-sm font-medium text-slate-400 ml-1">Status</label>
-              <select v-model="form.status" 
-                      class="w-full md:w-48 bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-transparent transition-all duration-200">
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Categories Multi-Select Combobox -->
+              <div class="space-y-2">
+                <label class="text-sm font-medium text-slate-400 ml-1">Categories</label>
+                <div ref="categoryDropdownRef" class="relative">
+                  <!-- Combobox Trigger -->
+                  <div @click="toggleCategoryDropdown" 
+                       class="w-full min-h-[48px] bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-white cursor-pointer transition-all duration-300 flex items-center flex-wrap gap-2"
+                       :class="{ 
+                         'ring-2 ring-indigo-500/50 border-indigo-500/50 shadow-lg shadow-indigo-500/10': showCategoryDropdown,
+                         'hover:border-white/20 hover:bg-slate-900/70': !showCategoryDropdown 
+                       }">
+                    <!-- Selected Tags -->
+                    <span v-if="form.category_ids.length === 0" class="text-slate-500">Select categories...</span>
+                    <span v-for="catId in form.category_ids" :key="catId"
+                          class="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-lg text-sm transition-all duration-200 hover:bg-indigo-500/30">
+                      {{ getCategoryName(catId) }}
+                      <button @click.stop="removeCategory(catId)" type="button" 
+                              class="ml-1 hover:text-white transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                      </button>
+                    </span>
+                    <!-- Dropdown Arrow -->
+                    <svg class="w-5 h-5 ml-auto text-slate-400 transition-transform duration-300" 
+                         :class="{ 'rotate-180': showCategoryDropdown }"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                  </div>
+                  
+                  <!-- Dropdown Options -->
+                  <transition 
+                    enter-active-class="transition ease-out duration-200"
+                    enter-from-class="opacity-0 translate-y-1"
+                    enter-to-class="opacity-100 translate-y-0"
+                    leave-active-class="transition ease-in duration-150"
+                    leave-from-class="opacity-100 translate-y-0"
+                    leave-to-class="opacity-0 translate-y-1">
+                    <div v-if="showCategoryDropdown" 
+                         class="absolute z-50 w-full mt-2 bg-slate-800 border border-white/10 rounded-xl shadow-2xl shadow-black/50 overflow-hidden backdrop-blur-xl">
+                      <div v-if="categories.length === 0" class="p-4 text-slate-500 text-sm text-center">
+                        No categories available
+                      </div>
+                      <div v-else class="max-h-48 overflow-y-auto custom-scrollbar">
+                        <div v-for="cat in categories" :key="cat.id"
+                             @click="toggleCategory(cat.id)"
+                             class="flex items-center gap-3 px-4 py-3 cursor-pointer transition-all duration-150"
+                             :class="form.category_ids.includes(cat.id) 
+                               ? 'bg-indigo-500/20 text-indigo-300' 
+                               : 'text-slate-300 hover:bg-white/5'">
+                          <div class="w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200"
+                               :class="form.category_ids.includes(cat.id) 
+                                 ? 'bg-indigo-500 border-indigo-500' 
+                                 : 'border-slate-500'">
+                            <svg v-if="form.category_ids.includes(cat.id)" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                            </svg>
+                          </div>
+                          <span class="text-sm font-medium">{{ cat.name }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </transition>
+                </div>
+              </div>
+              
+              <!-- Status -->
+              <div class="space-y-2">
+                <label class="text-sm font-medium text-slate-400 ml-1">Status</label>
+                <div class="relative">
+                  <select v-model="form.status" 
+                          class="w-full appearance-none bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 pr-10 text-white cursor-pointer transition-all duration-300 hover:border-white/20 hover:bg-slate-900/70 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 focus:shadow-lg focus:shadow-indigo-500/10">
+                    <option value="active" class="bg-slate-800 text-white">Active</option>
+                    <option value="inactive" class="bg-slate-800 text-white">Inactive</option>
+                  </select>
+                  <!-- Custom Arrow -->
+                  <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </div>
+              </div>
             </div>
             
             <!-- Action Buttons -->
@@ -94,6 +169,7 @@
                 <tr class="text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-white/5">
                   <th class="p-4 pl-6">#</th>
                   <th class="p-4">Name</th>
+                  <th class="p-4">Categories</th>
                   <th class="p-4">Price</th>
                   <th class="p-4">Status</th>
                   <th class="p-4 pr-6 text-right">Actions</th>
@@ -105,6 +181,15 @@
                   <td class="p-4 text-white font-medium">
                     <div>{{ p.name }}</div>
                     <div v-if="p.description" class="text-xs text-slate-500 truncate max-w-xs">{{ p.description }}</div>
+                  </td>
+                  <td class="p-4">
+                    <div class="flex flex-wrap gap-1 max-w-xs">
+                      <span v-for="cat in p.categories" :key="cat.id"
+                            class="px-2 py-0.5 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-full text-xs">
+                        {{ cat.name }}
+                      </span>
+                      <span v-if="!p.categories || p.categories.length === 0" class="text-slate-500 text-xs">-</span>
+                    </div>
                   </td>
                   <td class="p-4 text-emerald-400 font-medium">Rp {{ formatPrice(p.price) }}</td>
                   <td class="p-4">
@@ -127,7 +212,7 @@
                   </td>
                 </tr>
                 <tr v-if="products.length === 0">
-                  <td colspan="5" class="p-8 text-center text-slate-500">
+                  <td colspan="6" class="p-8 text-center text-slate-500">
                     No products found. Add one above!
                   </td>
                 </tr>
@@ -151,20 +236,58 @@
 <script setup>
 import Sidebar from '../../components/sidebar/Sidebar.vue';
 import ConfirmModal from '../../components/ui/ConfirmModal.vue';
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, onUnmounted } from 'vue';
 
 const products = ref([]);
+const categories = ref([]);
 const form = reactive({ 
   id: null, 
   name: '', 
   description: '', 
   price: '', 
-  status: 'active' 
+  status: 'active',
+  category_ids: []
 });
 
 // Modal State
 const showDeleteModal = ref(false);
 const itemToDelete = ref(null);
+
+// Category Combobox State
+const showCategoryDropdown = ref(false);
+const categoryDropdownRef = ref(null);
+
+const toggleCategoryDropdown = () => {
+    showCategoryDropdown.value = !showCategoryDropdown.value;
+}
+
+const toggleCategory = (id) => {
+    const index = form.category_ids.indexOf(id);
+    if (index === -1) {
+        form.category_ids.push(id);
+    } else {
+        form.category_ids.splice(index, 1);
+    }
+}
+
+const removeCategory = (id) => {
+    const index = form.category_ids.indexOf(id);
+    if (index !== -1) {
+        form.category_ids.splice(index, 1);
+    }
+}
+
+const getCategoryName = (id) => {
+    const cat = categories.value.find(c => c.id === id);
+    return cat ? cat.name : '';
+}
+
+// Close dropdown when clicking outside
+const handleClickOutside = (event) => {
+    if (categoryDropdownRef.value && !categoryDropdownRef.value.contains(event.target)) {
+        showCategoryDropdown.value = false;
+    }
+}
 
 const formatPrice = (price) => {
     return Number(price).toLocaleString('id-ID');
@@ -174,7 +297,9 @@ const load = async () => {
     try {
         const res = await fetch('/admin/product/data');
         if (res.ok) {
-           products.value = await res.json();
+           const data = await res.json();
+           products.value = data.products;
+           categories.value = data.categories;
         }
     } catch (e) {
         console.error("Failed to load products", e);
@@ -199,7 +324,8 @@ const save = async () => {
                 name: form.name,
                 description: form.description,
                 price: form.price,
-                status: form.status
+                status: form.status,
+                category_ids: form.category_ids
             })
         });
         
@@ -216,6 +342,7 @@ const edit = (p) => {
     form.description = p.description || '';
     form.price = p.price;
     form.status = p.status;
+    form.category_ids = p.categories ? p.categories.map(c => c.id) : [];
 }
 
 const cancelEdit = () => {
@@ -224,6 +351,8 @@ const cancelEdit = () => {
     form.description = '';
     form.price = '';
     form.status = 'active';
+    form.category_ids = [];
+    showCategoryDropdown.value = false;
 }
 
 const confirmDelete = (id) => {
@@ -252,5 +381,38 @@ const executeDelete = async () => {
 
 onMounted(() => {
     load();
+    document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside);
 });
 </script>
+
+<style scoped>
+/* Custom Scrollbar for Dropdown */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.5);
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.7);
+}
+
+/* Select option styling */
+select option {
+    background-color: #1e293b;
+    color: white;
+    padding: 8px;
+}
+</style>
