@@ -6,6 +6,7 @@ import AdminApp from './admin/main';
 import CategoriesApp from './admin/categories/main';
 import ProductApp from './admin/product/main';
 import LoginApp from './auth/main';
+import CustomersApp from './admin/customers/main';
 
 console.log('app.js loaded');
 
@@ -23,5 +24,8 @@ if (document.getElementById('categories-app')) {
 }
 if (document.getElementById('product-app')) {
     createApp(ProductApp).mount('#product-app');
+}
+if (document.getElementById('customers-app')) {
+    createApp(CustomersApp).mount('#customers-app');
 }
 

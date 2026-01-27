@@ -18,7 +18,7 @@
       <div class="p-8 max-w-6xl mx-auto">
         
         <!-- Add/Edit Form -->
-        <div class="mb-8 p-6 bg-slate-800/50 backdrop-blur-xl border border-white/5 rounded-2xl shadow-xl">
+        <div class="relative z-10 mb-8 p-6 bg-slate-800/50 backdrop-blur-xl border border-white/5 rounded-2xl shadow-xl">
           <h2 class="text-lg font-bold text-white mb-4 flex items-center">
             <span class="mr-2">{{ form.id ? 'Edit Product' : 'Add New Product' }}</span>
             <div class="h-px bg-white/10 flex-1 ml-4"></div>
@@ -295,7 +295,7 @@ const formatPrice = (price) => {
 
 const load = async () => {
     try {
-        const res = await fetch('/admin/product/data');
+        const res = await fetch('/admin/products/data');
         if (res.ok) {
            const data = await res.json();
            products.value = data.products;
@@ -310,8 +310,8 @@ const save = async () => {
     if (!form.name || !form.price) return;
 
     const url = form.id
-      ? `/admin/product/${form.id}`
-      : `/admin/product`;
+      ? `/admin/products/${form.id}`
+      : `/admin/products`;
 
     try {
         await fetch(url, {
@@ -364,7 +364,7 @@ const executeDelete = async () => {
     if (!itemToDelete.value) return;
     
     try {
-        await fetch(`/admin/product/${itemToDelete.value}`, {
+        await fetch(`/admin/products/${itemToDelete.value}`, {
             method: 'DELETE',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
