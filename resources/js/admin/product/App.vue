@@ -46,6 +46,26 @@
                        placeholder="e.g. 15000000" 
                        required />
               </div>
+
+               <!-- Image Upload -->
+               <div class="space-y-2 col-span-2">
+                 <label class="text-sm font-medium text-slate-400 ml-1">Product Image</label>
+                 <div class="flex items-center gap-4">
+                   <div v-if="previewImage" class="relative w-20 h-20 rounded-lg overflow-hidden border border-white/10">
+                     <img :src="previewImage" class="w-full h-full object-cover" />
+                     <button @click="removeImage" type="button" class="absolute top-0 right-0 bg-red-500/80 p-1 text-white hover:bg-red-600 transition-colors">
+                       <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                     </button>
+                   </div>
+                   <input type="file" @change="handleFileChange" accept="image/*"
+                          class="block w-full text-sm text-slate-400
+                            file:mr-4 file:py-2 file:px-4
+                            file:rounded-full file:border-0
+                            file:text-sm file:font-semibold
+                            file:bg-indigo-500/10 file:text-indigo-400
+                            hover:file:bg-indigo-500/20" />
+                 </div>
+               </div>
             </div>
             
             <!-- Description -->
@@ -168,6 +188,7 @@
               <thead>
                 <tr class="text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-white/5">
                   <th class="p-4 pl-6">#</th>
+                  <th class="p-4">Image</th>
                   <th class="p-4">Name</th>
                   <th class="p-4">Categories</th>
                   <th class="p-4">Price</th>
@@ -178,6 +199,12 @@
               <tbody class="text-sm divide-y divide-white/5">
                 <tr v-for="(p, i) in products" :key="p.id" class="hover:bg-white/5 transition-colors duration-150 group">
                   <td class="p-4 pl-6 font-medium text-slate-400">{{ i + 1 }}</td>
+                  <td class="p-4">
+                    <div class="w-12 h-12 rounded-lg bg-slate-700 overflow-hidden border border-white/5">
+                      <img v-if="p.image" :src="`/storage/${p.image}`" class="w-full h-full object-cover" alt="" />
+                      <div v-else class="w-full h-full flex items-center justify-center text-slate-500 text-xs">No Img</div>
+                    </div>
+                  </td>
                   <td class="p-4 text-white font-medium">
                     <div>{{ p.name }}</div>
                     <div v-if="p.description" class="text-xs text-slate-500 truncate max-w-xs">{{ p.description }}</div>
@@ -246,8 +273,10 @@ const form = reactive({
   description: '', 
   price: '', 
   status: 'active',
-  category_ids: []
+  category_ids: [],
+  image: null
 });
+const previewImage = ref(null);
 
 // Modal State
 const showDeleteModal = ref(false);
@@ -306,6 +335,20 @@ const load = async () => {
     }
 }
 
+const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        form.image = file;
+        previewImage.value = URL.createObjectURL(file);
+    }
+}
+
+const removeImage = () => {
+    form.image = null;
+    previewImage.value = null;
+    // reset file input if possible or just rely on state
+}
+
 const save = async () => {
     if (!form.name || !form.price) return;
 
@@ -314,19 +357,30 @@ const save = async () => {
       : `/admin/products`;
 
     try {
+        const formData = new FormData();
+        formData.append('name', form.name);
+        formData.append('description', form.description ?? '');
+        formData.append('price', form.price);
+        formData.append('status', form.status);
+        
+        if (form.category_ids && form.category_ids.length) {
+             form.category_ids.forEach(id => formData.append('category_ids[]', id));
+        }
+
+        if (form.image instanceof File) {
+            formData.append('image', form.image);
+        }
+
+        if (form.id) {
+             formData.append('_method', 'PUT'); // Laravel method spoofing for FormData
+        }
+
         await fetch(url, {
-            method: form.id ? 'PUT' : 'POST',
+            method: 'POST', // Always POST for FormData with binary
             headers: {
-                'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             },
-            body: JSON.stringify({ 
-                name: form.name,
-                description: form.description,
-                price: form.price,
-                status: form.status,
-                category_ids: form.category_ids
-            })
+            body: formData
         });
         
         cancelEdit();
@@ -343,6 +397,8 @@ const edit = (p) => {
     form.price = p.price;
     form.status = p.status;
     form.category_ids = p.categories ? p.categories.map(c => c.id) : [];
+    form.image = null; // Don't allow editing existing file directly, just upload new one
+    previewImage.value = p.image ? `/storage/${p.image}` : null;
 }
 
 const cancelEdit = () => {
@@ -352,6 +408,8 @@ const cancelEdit = () => {
     form.price = '';
     form.status = 'active';
     form.category_ids = [];
+    form.image = null;
+    previewImage.value = null;
     showCategoryDropdown.value = false;
 }
 

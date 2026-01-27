@@ -31,23 +31,34 @@ class ProductController extends Controller
             'name' => 'required|min:3',
             'price' => 'required|numeric|min:0',
             'description' => 'nullable|string',
+            'image' => 'nullable|image|max:2048',
             'status' => 'in:active,inactive',
             'category_ids' => 'nullable|array',
             'category_ids.*' => 'exists:categories,id'
         ]);
 
-        $product = Product::create([
+        $data = [
             'name' => $request->name,
             'slug' => Str::slug($request->name),
             'description' => $request->description,
             'price' => $request->price,
             'status' => $request->status ?? 'active',
             'created_by' => Auth::id()
-        ]);
+        ];
+
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('products', 'public');
+        }
+
+        $product = Product::create($data);
 
         // Sync categories to the pivot table
         if ($request->has('category_ids')) {
-            $product->categories()->sync($request->category_ids);
+            // category_ids might come as a string "1,2,3" if sent via FormData, or array if JSON.
+            // Since we'll switch to FormData, it might be an array if using proper appendage, or not.
+            // Usually FormData with array looks like category_ids[0], category_ids[1].
+            // Laravel handles this if name is "category_ids[]"
+             $product->categories()->sync($request->category_ids);
         }
 
         return $product->load('categories');
@@ -62,22 +73,35 @@ class ProductController extends Controller
             'name' => 'required|min:3',
             'price' => 'required|numeric|min:0',
             'description' => 'nullable|string',
+            'image' => 'nullable|image|max:2048',
             'status' => 'in:active,inactive',
             'category_ids' => 'nullable|array',
             'category_ids.*' => 'exists:categories,id'
         ]);
 
         $product = Product::findOrFail($id);
-        $product->update([
+        
+        $data = [
             'name' => $request->name,
             'slug' => Str::slug($request->name),
             'description' => $request->description,
             'price' => $request->price,
             'status' => $request->status ?? 'active'
-        ]);
+        ];
+
+        if ($request->hasFile('image')) {
+            if ($product->image) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($product->image);
+            }
+            $data['image'] = $request->file('image')->store('products', 'public');
+        }
+
+        $product->update($data);
 
         // Sync categories to the pivot table
-        $product->categories()->sync($request->category_ids ?? []);
+        if ($request->has('category_ids')) {
+            $product->categories()->sync($request->category_ids);
+        }
 
         return $product->load('categories');
     }

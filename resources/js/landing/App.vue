@@ -21,6 +21,28 @@ const services = [
         icon: "🎨",
     },
 ];
+
+import { ref, onMounted } from 'vue';
+
+const products = ref([]);
+const loading = ref(true);
+
+const formatPrice = (price) => {
+    return Number(price).toLocaleString('id-ID');
+}
+
+onMounted(async () => {
+    try {
+        const res = await fetch('/landing/products');
+        if (res.ok) {
+            products.value = await res.json();
+        }
+    } catch (e) {
+        console.error("Failed to load products", e);
+    } finally {
+        loading.value = false;
+    }
+});
 </script>
 
 <template>
@@ -204,6 +226,69 @@ const services = [
                         <p class="text-gray-600 leading-relaxed">
                             {{ service.description }}
                         </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Products Section -->
+        <section id="products" class="py-24 bg-white border-t border-gray-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-2xl mx-auto mb-16">
+                    <h2 class="text-base text-blue-600 font-semibold tracking-wide uppercase mb-2">
+                        Shop
+                    </h2>
+                    <p class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                        Featured Products
+                    </p>
+                    <p class="text-gray-600 text-lg">
+                        Check out our latest collection.
+                    </p>
+                </div>
+
+                <div v-if="loading" class="flex justify-center py-12">
+                   <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                </div>
+
+                <div v-else-if="products.length === 0" class="text-center py-12 text-gray-500">
+                    No products available at the moment.
+                </div>
+
+                <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div v-for="product in products" :key="product.id" class="group bg-gray-50 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100">
+                        <div class="aspect-[4/3] overflow-hidden bg-gray-200 relative">
+                             <img v-if="product.image" :src="`/storage/${product.image}`" :alt="product.name" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500" />
+                             <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
+                                 <span class="text-4xl opacity-25">📦</span>
+                             </div>
+                             
+                             <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                 <button class="bg-white text-gray-900 px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                                     View Details
+                                 </button>
+                             </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-xl font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+                                    {{ product.name }}
+                                </h3>
+                                <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded-full whitespace-nowrap">
+                                    {{ product.categories && product.categories.length ? product.categories[0].name : 'Item' }}
+                                </span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-4 line-clamp-2 min-h-[2.5em]">
+                                {{ product.description || 'No description available.' }}
+                            </p>
+                            <div class="flex items-center justify-between mt-auto">
+                                <span class="text-2xl font-bold text-gray-900">
+                                    <span class="text-sm font-normal text-gray-500 align-top mr-0.5">Rp</span>{{ formatPrice(product.price) }}
+                                </span>
+                                <button class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/30">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

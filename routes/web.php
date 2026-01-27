@@ -17,6 +17,10 @@ Route::get('/', function () {
     return view('landing');
 });
 
+Route::get('/landing/products', function () {
+    return response()->json(App\Models\Product::with('categories')->where('status', 'active')->latest()->take(6)->get());
+});
+
 
 Route::prefix('admin')->middleware('auth')->group(function () {
     // Categories
