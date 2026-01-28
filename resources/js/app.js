@@ -8,6 +8,7 @@ import ProductApp from './admin/product/main';
 import LoginApp from './auth/main';
 import CustomersApp from './admin/customers/main';
 import OrdersApp from './admin/orders/main';
+import UsersProductApp from './users/product/main';
 
 console.log('app.js loaded');
 
@@ -31,5 +32,9 @@ if (document.getElementById('customers-app')) {
 }
 if (document.getElementById('orders-app')){
     createApp(OrdersApp).mount('#orders-app');
+}
+
+if (document.getElementById('users-product-app')) {
+    createApp(UsersProductApp).mount('#users-product-app');
 }
 

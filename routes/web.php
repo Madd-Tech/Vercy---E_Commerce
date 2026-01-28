@@ -21,6 +21,14 @@ Route::get('/landing/products', function () {
     return response()->json(App\Models\Product::with('categories')->where('status', 'active')->latest()->take(6)->get());
 });
 
+Route::get('/products', function () {
+    return view('users.product');
+});
+
+Route::get('/api/products/all', function () {
+    return response()->json(App\Models\Product::with('categories')->where('status', 'active')->latest()->get());
+});
+
 
 Route::prefix('admin')->middleware('auth')->group(function () {
     // Categories

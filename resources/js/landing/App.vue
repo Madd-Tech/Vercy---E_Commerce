@@ -23,9 +23,32 @@ const services = [
 ];
 
 import { ref, onMounted } from 'vue';
+import productImg from '../../assets/product.jpg';
 
 const products = ref([]);
 const loading = ref(true);
+const selectedProduct = ref(null);
+const carouselContainer = ref(null);
+
+const scrollLeft = () => {
+    if (carouselContainer.value) {
+        carouselContainer.value.scrollBy({ left: -320, behavior: 'smooth' });
+    }
+};
+
+const scrollRight = () => {
+    if (carouselContainer.value) {
+        carouselContainer.value.scrollBy({ left: 320, behavior: 'smooth' });
+    }
+};
+
+const openModal = (product) => {
+    selectedProduct.value = product;
+};
+
+const closeModal = () => {
+    selectedProduct.value = null;
+};
 
 const formatPrice = (price) => {
     return Number(price).toLocaleString('id-ID');
@@ -61,17 +84,17 @@ onMounted(async () => {
                         <span
                             class="flex h-2 w-2 rounded-full bg-blue-600 mr-2"
                         ></span>
-                        Now accepting new projects
+                        Best Choice for looking a new product
                     </div>
                     <h1
                         class="text-5xl md:text-7xl font-extrabold tracking-tight text-gray-900 mb-8 leading-tight"
                     >
-                        We Build
+                        We Sell
                         <span
                             class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600"
-                            >Digital Profiles</span
+                            >Officially Products</span
                         >
-                        That Stand Out.
+                        That Trusted.
                     </h1>
                     <p
                         class="mt-4 text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed"
@@ -85,7 +108,7 @@ onMounted(async () => {
                             href="#contact"
                             class="px-8 py-4 bg-blue-600 text-white rounded-full font-semibold text-lg hover:bg-blue-700 transition-all duration-300 shadow-lg shadow-blue-500/30 ring-4 ring-blue-500/10"
                         >
-                            Start Your Project
+                            Order Now
                         </a>
                         <a
                             href="#about"
@@ -125,9 +148,7 @@ onMounted(async () => {
                             <div
                                 class="aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-400"
                             >
-                                <span class="text-xl"
-                                    >Business Image Placeholder</span
-                                >
+                               <img :src="productImg" alt="About Us" class="w-full h-full object-cover">
                             </div>
                         </div>
                         <div
@@ -254,41 +275,61 @@ onMounted(async () => {
                     No products available at the moment.
                 </div>
 
-                <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <div v-for="product in products" :key="product.id" class="group bg-gray-50 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100">
-                        <div class="aspect-[4/3] overflow-hidden bg-gray-200 relative">
-                             <img v-if="product.image" :src="`/storage/${product.image}`" :alt="product.name" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500" />
-                             <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
-                                 <span class="text-4xl opacity-25">📦</span>
-                             </div>
-                             
-                             <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                 <button class="bg-white text-gray-900 px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                                     View Details
-                                 </button>
-                             </div>
-                        </div>
-                        <div class="p-6">
-                            <div class="flex justify-between items-start mb-2">
-                                <h3 class="text-xl font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
-                                    {{ product.name }}
-                                </h3>
-                                <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded-full whitespace-nowrap">
-                                    {{ product.categories && product.categories.length ? product.categories[0].name : 'Item' }}
-                                </span>
+                <div v-else class="relative">
+                     <!-- Navigation Buttons -->
+                    <button @click="scrollLeft" class="absolute left-0 top-1/2 -translate-y-1/2 -ml-4 lg:-ml-12 z-10 w-12 h-12 bg-white rounded-full shadow-lg border border-gray-100 flex items-center justify-center text-gray-700 hover:text-blue-600 hover:scale-110 transition-all duration-300 focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    </button>
+                    <button @click="scrollRight" class="absolute right-0 top-1/2 -translate-y-1/2 -mr-4 lg:-mr-12 z-10 w-12 h-12 bg-white rounded-full shadow-lg border border-gray-100 flex items-center justify-center text-gray-700 hover:text-blue-600 hover:scale-110 transition-all duration-300 focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </button>
+
+                    <!-- Carousel Container -->
+                    <div ref="carouselContainer" class="flex overflow-x-auto gap-8 pb-8 px-4 snap-x snap-mandatory scrollbar-hide -mx-4">
+                        <div v-for="product in products" :key="product.id" class="flex-none w-full sm:w-1/2 lg:w-1/3 snap-center">
+                            <div class="group h-full bg-gray-50 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col">
+                                <div class="aspect-[4/3] overflow-hidden bg-gray-200 relative">
+                                     <img v-if="product.image" :src="`/storage/${product.image}`" :alt="product.name" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500" />
+                                     <div v-else class="w-full h-full flex items-center justify-center text-gray-400">
+                                         <span class="text-4xl opacity-25">📦</span>
+                                     </div>
+                                     
+                                     <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                         <button @click="openModal(product)" class="bg-white text-gray-900 px-6 py-2 rounded-full font-bold transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                                             View Details
+                                         </button>
+                                     </div>
+                                </div>
+                                <div class="p-6 flex flex-col flex-grow">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <h3 class="text-xl font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+                                            {{ product.name }}
+                                        </h3>
+                                        <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded-full whitespace-nowrap">
+                                            {{ product.categories && product.categories.length ? product.categories[0].name : 'Item' }}
+                                        </span>
+                                    </div>
+                                    <p class="text-gray-600 text-sm mb-4 line-clamp-2 min-h-[2.5em]">
+                                        {{ product.description || 'No description available.' }}
+                                    </p>
+                                    <div class="flex items-center justify-between mt-auto">
+                                        <span class="text-2xl font-bold text-gray-900">
+                                            <span class="text-sm font-normal text-gray-500 align-top mr-0.5">Rp</span>{{ formatPrice(product.price) }}
+                                        </span>
+                                        <button class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/30">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                            <p class="text-gray-600 text-sm mb-4 line-clamp-2 min-h-[2.5em]">
-                                {{ product.description || 'No description available.' }}
-                            </p>
-                            <div class="flex items-center justify-between mt-auto">
-                                <span class="text-2xl font-bold text-gray-900">
-                                    <span class="text-sm font-normal text-gray-500 align-top mr-0.5">Rp</span>{{ formatPrice(product.price) }}
-                                </span>
-                                <button class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/30">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-                                </button>
-                            </div>
                         </div>
+                    </div>
+                
+                    <div class="mt-8 text-center">
+                        <a href="/products" class="inline-flex items-center justify-center px-8 py-4 border border-transparent text-lg font-medium rounded-full text-blue-700 bg-blue-100 hover:bg-blue-200 transition-colors duration-300">
+                            See More Products
+                            <svg class="ml-2 -mr-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -298,10 +339,10 @@ onMounted(async () => {
         <section id="contact" class="py-24 bg-white">
             <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-                    Ready to transform your business?
+                    Ready to Order Now?
                 </h2>
                 <p class="text-xl text-gray-600 mb-10">
-                    Let's discuss how we can help you achieve your goals. Our
+                    Let's discuss how we can help you get your favorite things. Our
                     team is ready to answer your questions.
                 </p>
                 <div class="flex flex-col sm:flex-row justify-center gap-4">
@@ -339,6 +380,54 @@ onMounted(async () => {
                 </div>
             </div>
         </footer>
+    <!-- Modal -->
+        <Transition name="modal">
+            <div v-if="selectedProduct" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" @click.self="closeModal">
+                <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative flex flex-col md:flex-row overflow-hidden">
+                     <button @click="closeModal" class="absolute top-4 right-4 z-10 bg-white/80 hover:bg-white rounded-full p-2 transition-colors text-gray-800">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                     </button>
+                     
+                     <div class="md:w-1/2 bg-gray-100 relative min-h-[300px] md:min-h-full">
+                         <img v-if="selectedProduct.image" :src="`/storage/${selectedProduct.image}`" class="absolute inset-0 w-full h-full object-cover">
+                         <div v-else class="absolute inset-0 flex items-center justify-center text-gray-400">
+                             <span class="text-6xl opacity-25">📦</span>
+                         </div>
+                     </div>
+                     
+                     <div class="p-8 md:w-1/2 flex flex-col">
+                        <div class="mb-4">
+                             <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded uppercase tracking-wide mb-2 inline-block">{{ selectedProduct.categories && selectedProduct.categories.length ? selectedProduct.categories[0].name : 'Item' }}</span>
+                             <h2 class="text-3xl font-bold text-gray-900 mb-1 leading-tight">{{ selectedProduct.name }}</h2>
+                        </div>
+
+                        <div class="prose prose-sm text-gray-600 mb-6 flex-grow overflow-y-auto max-h-60">
+                            <p>{{ selectedProduct.description || 'No description available for this product.' }}</p>
+                        </div>
+
+                        <div class="mt-auto pt-6 border-t border-gray-100">
+                            <div class="flex justify-between items-end mb-6">
+                                <div>
+                                    <p class="text-sm text-gray-500 mb-1">Price</p>
+                                    <p class="text-3xl font-bold text-gray-900">Rp {{ formatPrice(selectedProduct.price) }}</p>
+                                </div>
+                                <div class="text-right">
+                                     <p class="text-sm text-gray-500 mb-1">Status</p>
+                                     <span :class="{'bg-green-100 text-green-700': selectedProduct.status === 'active', 'bg-red-100 text-red-700': selectedProduct.status !== 'active'}" class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
+                                         {{ selectedProduct.status }}
+                                     </span>
+                                </div>
+                            </div>
+                            
+                            <button class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl hover:bg-blue-700 transition-all duration-300 shadow-lg shadow-blue-500/30 ring-4 ring-blue-500/10 flex items-center justify-center gap-2">
+                                <span>Order Now</span>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Transition>
     </div>
 </template>
 
@@ -366,5 +455,25 @@ onMounted(async () => {
 }
 .animation-delay-4000 {
     animation-delay: 4s;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
 }
 </style>
