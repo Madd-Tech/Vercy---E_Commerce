@@ -9,6 +9,13 @@ import LoginApp from './auth/main';
 import CustomersApp from './admin/customers/main';
 import OrdersApp from './admin/orders/main';
 import UsersProductApp from './users/product/main';
+import UsersSignupApp from './users/signup/main';
+import UsersOrderApp from './users/order/main';
+import UsersOverviewApp from './users/overview/main';
+
+if (document.getElementById('users-order-app')){
+    createApp(UsersOrderApp).mount('#users-order-app');
+}
 
 console.log('app.js loaded');
 
@@ -33,8 +40,13 @@ if (document.getElementById('customers-app')) {
 if (document.getElementById('orders-app')){
     createApp(OrdersApp).mount('#orders-app');
 }
-
 if (document.getElementById('users-product-app')) {
     createApp(UsersProductApp).mount('#users-product-app');
+}
+if (document.getElementById('users-signup-app')) {
+    createApp(UsersProductApp).mount('#users-signup-app');
+}
+if (document.getElementById('users-overview-app')){
+    createApp(UsersOverviewApp).mount('#users-overview-app');
 }
 

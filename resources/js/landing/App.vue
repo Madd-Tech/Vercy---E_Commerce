@@ -419,10 +419,10 @@ onMounted(async () => {
                                 </div>
                             </div>
                             
-                            <button class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl hover:bg-blue-700 transition-all duration-300 shadow-lg shadow-blue-500/30 ring-4 ring-blue-500/10 flex items-center justify-center gap-2">
+                            <a :href="`/orders/${selectedProduct.id}`" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl hover:bg-blue-700 transition-all duration-300 shadow-lg shadow-blue-500/30 ring-4 ring-blue-500/10 flex items-center justify-center gap-2">
                                 <span>Order Now</span>
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>

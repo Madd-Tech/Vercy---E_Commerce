@@ -9,8 +9,10 @@ class customer extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'name','email','phone','address','created_by'
+        'name','email','phone','address','created_by','password'
     ];
+
+    protected $hidden = ['password'];
 
     public function orders()
     {

@@ -13,8 +13,13 @@ Route::get('/dashboard', fn () => view('admin.dashboard'))
 
 Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth');
+
 Route::get('/', function () {
     return view('landing');
+});
+
+Route::get('/overview',function(){
+   return view('users.overview');
 });
 
 Route::get('/landing/products', function () {
@@ -24,6 +29,8 @@ Route::get('/landing/products', function () {
 Route::get('/products', function () {
     return view('users.product');
 });
+
+
 
 Route::get('/api/products/all', function () {
     return response()->json(App\Models\Product::with('categories')->where('status', 'active')->latest()->get());
@@ -53,3 +60,13 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::delete('/customers/{id}', [CustomerController::class, 'destroy']);
 });
 
+
+// Public route for customer sign-up
+Route::post('/customers', [CustomerController::class, 'store']);
+Route::post('/customers/login', [CustomerController::class, 'login']);
+
+// Order Routes
+Route::get('/orders/{product}', function ($product) {
+    return view('users.order', ['productId' => $product]);
+});
+Route::post('/orders', [\App\Http\Controllers\OrderController::class, 'store']);

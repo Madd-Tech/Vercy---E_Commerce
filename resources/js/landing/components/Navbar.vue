@@ -1,17 +1,41 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 
 const isOpen = ref(false);
+const customer = ref(null);
+
+const checkCustomer = () => {
+    const storedCustomer = localStorage.getItem('customer');
+    if (storedCustomer) {
+        try {
+            customer.value = JSON.parse(storedCustomer);
+        } catch (e) {
+            console.error('Error parsing customer data', e);
+        }
+    }
+};
+
+onMounted(() => {
+    checkCustomer();
+    // Optional: Listen for storage events if tabs share state
+    window.addEventListener('storage', checkCustomer);
+});
+
+const logout = () => {
+    localStorage.removeItem('customer');
+    customer.value = null;
+    window.location.href = '/overview';
+};
 
 const toggleMenu = () => {
     isOpen.value = !isOpen.value;
 };
 
 const menuItems = [
-    { name: "Home", href: "#home" },
-    { name: "About", href: "#about" },
-    { name: "Services", href: "#services" },
-    { name: "Contact", href: "#contact" },
+    { name: "Home", href: "/#home" },
+    { name: "About", href: "/#about" },
+    { name: "Services", href: "/#services" },
+    { name: "Contact", href: "/#contact" },
 ];
 </script>
 
@@ -25,7 +49,7 @@ const menuItems = [
                     <div class="flex-shrink-0 flex items-center">
                         <span
                             class="font-bold text-2xl bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent"
-                            >Vercy</span
+                            >V E R C Y</span
                         >
                     </div>
                 </div>
@@ -42,11 +66,21 @@ const menuItems = [
                     >
                         {{ item.name }}
                     </a>
+    <div v-if="customer" class="flex items-center space-x-4">
+                        <span class="text-gray-700 font-medium">Hello, {{ customer.name }}</span>
+                        <button
+                            @click="logout"
+                            class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 shadow-md"
+                        >
+                            Sign Out
+                        </button>
+                    </div>
                     <a
-                        href="#contact"
+                        v-else
+                        href="/overview"
                         class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 shadow-lg shadow-blue-500/30"
                     >
-                        Get Started
+                        Sign In / Sign Up
                     </a>
                 </div>
 
@@ -113,12 +147,22 @@ const menuItems = [
                 >
                     {{ item.name }}
                 </a>
+                <div v-if="customer" class="px-3 py-2">
+                    <span class="block text-gray-700 font-medium mb-2">Hello, {{ customer.name }}</span>
+                    <button
+                        @click="logout"
+                        class="block w-full text-center bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-lg text-base font-medium transition-colors duration-200 shadow-md"
+                    >
+                        Sign Out
+                    </button>
+                </div>
                 <a
-                    href="#contact"
+                    v-else
+                    href="/overview"
                     @click="isOpen = false"
                     class="block w-full text-center mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg text-base font-medium transition-colors duration-200 shadow-md"
                 >
-                    Get Started
+                    Sign In / Sign Up
                 </a>
             </div>
         </div>
