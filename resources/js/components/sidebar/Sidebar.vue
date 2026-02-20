@@ -16,6 +16,24 @@
         Dashboard
       </a>
 
+      <a href="/admin/orders"
+         :class="[
+           'flex items-center px-4 py-3 text-slate-400 rounded-xl transition-all duration-200 mb-1 font-medium hover:bg-white/5 hover:text-white hover:translate-x-1', 
+           isActive('/admin/orders') ? 'bg-gradient-to-r from-indigo-600/20 to-purple-600/20 text-indigo-300 border border-indigo-500/30 shadow-lg shadow-indigo-500/10' : ''
+         ]">
+        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+        Orders
+      </a>
+
+      <a href="/admin/order_items"
+         :class="[
+           'flex items-center px-4 py-3 text-slate-400 rounded-xl transition-all duration-200 mb-1 font-medium hover:bg-white/5 hover:text-white hover:translate-x-1', 
+           isActive('/admin/order_items') ? 'bg-gradient-to-r from-indigo-600/20 to-purple-600/20 text-indigo-300 border border-indigo-500/30 shadow-lg shadow-indigo-500/10' : ''
+         ]">
+        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+        Order Items
+      </a>
+
       <a href="/admin/categories"
          :class="[
            'flex items-center px-4 py-3 text-slate-400 rounded-xl transition-all duration-200 mb-1 font-medium hover:bg-white/5 hover:text-white hover:translate-x-1', 

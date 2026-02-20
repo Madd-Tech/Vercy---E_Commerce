@@ -7,7 +7,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-slate-900">
-    <div id="admin-orders-app"></div>
-    @vite('resources/js/admin/orders/main.js')
+    <div id="admin-order_items-app"></div>
+    @vite('resources/js/admin/order_items/main.js')
 </body>
 </html>

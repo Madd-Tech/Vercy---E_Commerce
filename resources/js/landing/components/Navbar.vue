@@ -17,7 +17,7 @@ const checkCustomer = () => {
 
 onMounted(() => {
     checkCustomer();
-    // Optional: Listen for storage events if tabs share state
+
     window.addEventListener('storage', checkCustomer);
 });
 

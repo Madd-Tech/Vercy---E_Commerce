@@ -123,6 +123,42 @@
         </Transition>
 
     </div>
+
+    <!-- Custom Modal -->
+    <Transition name="modal">
+        <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+             <div class="bg-white rounded-lg shadow-xl max-w-sm w-full p-6 text-center transform transition-all">
+                 <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4" 
+                    :class="{
+                        'bg-red-100': modalType === 'error',
+                        'bg-blue-100': modalType === 'info'
+                    }">
+                    <!-- Error Icon -->
+                    <svg v-if="modalType === 'error'" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    <!-- Info Icon -->
+                    <svg v-else class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h3 class="text-lg leading-6 font-medium text-gray-900">{{ modalTitle }}</h3>
+                <div class="mt-2">
+                    <p class="text-sm text-gray-500">{{ modalMessage }}</p>
+                </div>
+                <div class="mt-6 flex justify-center">
+                    <button @click="closeCustomModal" 
+                        class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 sm:text-sm"
+                        :class="{
+                            'bg-red-600 hover:bg-red-700 focus:ring-red-500': modalType === 'error',
+                            'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500': modalType === 'info'
+                        }">
+                        OK
+                    </button>
+                </div>
+             </div>
+        </div>
+    </Transition>
   </div>
 </template>
 
@@ -135,8 +171,10 @@ const product = ref(null);
 const customer = ref(null);
 const loading = ref(true);
 const submitting = ref(false);
-const showInvoice = ref(false);
-const invoiceNumber = ref('');
+const showModal = ref(false);
+const modalTitle = ref('');
+const modalMessage = ref('');
+const modalType = ref('info'); 
 
 const form = reactive({
     quantity: 1
@@ -159,25 +197,27 @@ const checkCustomer = () => {
     }
 };
 
+const showCustomModal = (title, message, type = 'info') => {
+    modalTitle.value = title;
+    modalMessage.value = message;
+    modalType.value = type;
+    showModal.value = true;
+};
+
+const closeCustomModal = () => {
+    showModal.value = false;
+};
+
 onMounted(async () => {
     checkCustomer();
     if (productId) {
          try {
-             // We can reuse the landing/products API or fetch single product
-             // Currently there is no single product API route in web.php, only /landing/products (all) and /api/products/all
-             // I'll assume we can fetch all and filtering, OR I should add a route.
-             // Best to filtered from the existing `GET /api/products/all` for now as it's quick, or add a specific route.
-             // Actually, I can add a route to get single product.
-             // But let's try to filter from the /landing/products which returns 6 latest? 
-             // Or /api/products/all which returns all.
-             
              const response = await axios.get('/api/products/all');
              const products = response.data;
              product.value = products.find(p => p.id == productId);
              
              if (!product.value) {
-                 // Maybe it's not in the latest/active list?
-                 // Should ideally have a dedicated endpoint `GET /api/products/{id}`.
+                 // optionally handle not found
              }
         } catch (e) {
             console.error("Failed to load product", e);
@@ -200,20 +240,14 @@ const submitOrder = async () => {
             quantity: form.quantity
         });
         
-        invoiceNumber.value = response.data.invoice_number;
-        showInvoice.value = true;
+        window.location.href = `/invoices/${response.data.invoice_number}`;
         
     } catch (error) {
         console.error(error);
-        alert('Failed to place order.');
+        showCustomModal('Error', 'Failed to place order. Please try again.', 'error');
     } finally {
         submitting.value = false;
     }
-};
-
-const closeInvoice = () => {
-    showInvoice.value = false;
-    window.location.href = '/';
 };
 </script>
 

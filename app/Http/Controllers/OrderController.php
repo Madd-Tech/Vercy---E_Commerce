@@ -65,4 +65,46 @@ class OrderController extends Controller
             'invoice_number' => $invoiceNumber
         ]);
     }
+
+
+    public function show($order_number)
+    {
+        return view('users.invoice', ['orderNumber' => $order_number]);
+    }
+
+    public function getOrderByNumber($order_number)
+    {
+        $order = \App\Models\Order::with(['items.product', 'customer'])->where('order_number', $order_number)->firstOrFail();
+        return response()->json($order);
+    }
+
+    public function cancel($id)
+    {
+        $order = \App\Models\Order::findOrFail($id);
+        
+        if ($order->status === 'pending') {
+            $order->status = 'canceled';
+            $order->save();
+            return response()->json(['message' => 'Order canceled successfully', 'order' => $order->fresh()]);
+        }
+
+        return response()->json(['message' => 'Order cannot be canceled'], 400);
+    }
+
+    public function pay(Request $request, $id)
+    {
+        $order = \App\Models\Order::findOrFail($id);
+
+        if ($order->status === 'pending') {
+            // In a real scenario, you'd verify payment gateway response here.
+            // For now, we simulate successful payment.
+            
+            $order->status = 'paid';
+            $order->save();
+            
+            return response()->json(['message' => 'Payment successful', 'order' => $order->fresh()]);
+        }
+
+        return response()->json(['message' => 'Order cannot be paid'], 400);
+    }
 }

@@ -5,11 +5,17 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\CustomerController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\OrderItemsController;
+
+
 Route::get('/login', fn () => view('auth.login'))->middleware('guest');
 Route::post('/login', [AuthController::class, 'login'])->middleware('guest');
 
-Route::get('/dashboard', fn () => view('admin.dashboard'))
-    ->middleware('auth');
+use App\Http\Controllers\Admin\DashboardController;
+
+Route::get('/dashboard', fn () => view('admin.dashboard'))->middleware('auth');
+Route::get('/api/admin/dashboard/stats', [DashboardController::class, 'stats'])->middleware('auth');
 
 Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth');
@@ -58,6 +64,14 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::post('/customers', [CustomerController::class, 'store']);
     Route::put('/customers/{id}', [CustomerController::class, 'update']);
     Route::delete('/customers/{id}', [CustomerController::class, 'destroy']);
+
+    // Orders
+    Route::get('/orders', fn () => view('admin.orders'));
+    Route::get('/orders/data', [OrderController::class, 'index']);
+
+    // Order Items
+    Route::get('/order_items', fn () => view('admin.order_items'));
+    Route::get('/order_items/data', [OrderItemsController::class, 'index']);
 });
 
 
@@ -70,3 +84,7 @@ Route::get('/orders/{product}', function ($product) {
     return view('users.order', ['productId' => $product]);
 });
 Route::post('/orders', [\App\Http\Controllers\OrderController::class, 'store']);
+Route::get('/invoices/{order_number}', [\App\Http\Controllers\OrderController::class, 'show'])->name('invoices.show');
+Route::put('/orders/{order}/cancel', [\App\Http\Controllers\OrderController::class, 'cancel'])->name('orders.cancel');
+Route::put('/orders/{order}/pay', [\App\Http\Controllers\OrderController::class, 'pay'])->name('orders.pay');
+Route::get('/api/orders/{order_number}', [\App\Http\Controllers\OrderController::class, 'getOrderByNumber']);

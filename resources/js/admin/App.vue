@@ -50,15 +50,23 @@
         <div class="bg-slate-800/50 backdrop-blur-xl border border-white/5 rounded-2xl p-6">
           <h3 class="text-lg font-bold text-white mb-6">Recent Activity</h3>
           <div class="space-y-4">
-             <div v-for="i in 3" :key="i" class="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
+             <div v-for="order in recentOrders" :key="order.id" class="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
                 <div class="flex items-center space-x-4">
                    <div class="h-10 w-10 rounded-full bg-slate-700 flex items-center justify-center text-lg">🛍️</div>
                    <div>
-                      <p class="text-white font-medium">New Order #{{ 1023 + i }}</p>
-                      <p class="text-sm text-slate-400">2 minutes ago</p>
+                      <p class="text-white font-medium">Order #{{ order.order_number }}</p>
+                      <p class="text-sm text-slate-400">
+                          {{ order.customer ? order.customer.name : 'Unknown Customer' }}
+                      </p>
                    </div>
                 </div>
-                <span class="text-green-400 font-bold">+$120.00</span>
+                <div class="text-right">
+                    <span class="text-green-400 font-bold block">Rp {{ formatPrice(order.total_price) }}</span>
+                    <span class="text-xs text-slate-500 capitalize">{{ order.status }}</span>
+                </div>
+             </div>
+             <div v-if="recentOrders.length === 0" class="text-center text-slate-500 py-4">
+                 No recent orders.
              </div>
           </div>
         </div>
@@ -79,30 +87,60 @@ const TrendingUpIcon = {
 const stats = ref([
   { 
     title: 'Total Revenue', 
-    value: '$54,230', 
-    change: '+12%', 
+    value: '$0', 
+    change: '+0%', 
     changeType: 'up',
     icon: markRaw(TrendingUpIcon),
     bgColor: 'bg-green-500/10',
     textColor: 'text-green-400'
   },
   { 
-    title: 'Active Users', 
-    value: '2,430', 
-    change: '+5%', 
+    title: 'Active Customers', 
+    value: '0', 
+    change: '+0%', 
     changeType: 'up',
     icon: markRaw(TrendingUpIcon),
     bgColor: 'bg-blue-500/10',
     textColor: 'text-blue-400'
   },
   { 
-    title: 'New Orders', 
-    value: '145', 
-    change: '-2%', 
-    changeType: 'down',
+    title: 'New Orders Today', 
+    value: '0', 
+    change: '0', 
+    changeType: 'neutral',
     icon: markRaw(TrendingUpIcon),
     bgColor: 'bg-purple-500/10',
     textColor: 'text-purple-400'
   }
 ]);
+
+const recentOrders = ref([]);
+
+const formatPrice = (value) => {
+  return Number(value).toLocaleString('id-ID');
+};
+
+const fetchDashboardStats = async () => {
+    try {
+        const response = await axios.get('/api/admin/dashboard/stats');
+        const data = response.data;
+        
+        // Update stats
+        stats.value[0].value = `Rp ${formatPrice(data.totalRevenue)}`;
+        stats.value[1].value = data.activeUsers;
+        stats.value[2].value = data.newOrders;
+        
+        recentOrders.value = data.recentOrders;
+        
+    } catch (error) {
+        console.error("Failed to fetch dashboard stats", error);
+    }
+};
+
+import { onMounted } from 'vue';
+import axios from 'axios';
+
+onMounted(() => {
+    fetchDashboardStats();
+});
 </script>
